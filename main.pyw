@@ -3,7 +3,7 @@ import time, asyncio
 import pygame as pg
 import pygame.display as pgd
 
-version = '0.2'
+version = '0.3'
 
 all_lock = False
 rose_lock = False
@@ -15,24 +15,27 @@ match_check = False; minigame = [[None, None, None, None],
 
 async def letter_check():
     global letter_timer
-    pos = pya.locateOnScreen('a\\letter_end.png', confidence = 0.6)
-    print(pos)
-    if pos is not None and letter_timer == 0:
-        letter_timer = time.time() + 60
+    if letter_timer == 0:
+        pos = pya.locateOnScreen('a\\letter_end.png', confidence = 0.35)
+        rose_pos = pya.locateOnScreen('a\\thirty.png', confidence = 0.6, region = (0, 0, 250, pya.size()[1]))
+        if pos is not None and rose_pos is not None and match_check == False:
+            letter_timer = time.time() + 60
 
-def rose_garden():
+async def rose_garden():
     global match_check, minigame, match_timer
     pos = pya.locateOnScreen('a\\match.png', confidence = 0.7)
     if pos is not None and match_check == False:
         match_check = True
     if match_check == True:
-        end_pos = pya.locateOnScreen('a\\match_end_1.png', confidence = 0.7, grayscale=True)
-        leave_pos = pya.locateOnScreen('a\\match_end_2.png', confidence = 0.7, grayscale=True)
-        if end_pos is not None or leave_pos is not None:
-            match_check = False; match_timer = time.time() + 299
+        end_pos = pya.locateOnScreen('a\\match_end_1.png', confidence = 0.5)
+        leave_pos = pya.locateOnScreen('a\\match_end_2.png', confidence = 0.5)
+        rose_pos = pya.locateOnScreen('a\\thirty.png', confidence = 0.6, region = (0, 0, 250, pya.size()[1]))
+        if end_pos is not None or leave_pos is not None and match_check == True and rose_pos is not None:
+            match_timer = time.time() + 299
             minigame = [[None, None, None, None],
                         [None, None, None, None],
                         [None, None, None, None]]
+            await asyncio.sleep(5); match_check = False
 
 def find_relative_box_pos(pos):
     if pos is None: pass
@@ -66,7 +69,7 @@ async def match_box():
 def update_counters():
     global all_lock, match_check
     try:
-        rose_garden()
+        asyncio.run(rose_garden())
         if all_lock == False:
             all_lock = True
             asyncio.run(letter_check())
@@ -79,30 +82,30 @@ def render():
     (x, y) = (300, 50)
     screen.fill((255, 255, 255))
     screen.blit(credit_font.render(f'CoSCounter v{version} by oreli name by willow', True, (0,0,0)), (10, height - 10))
-    for i in minigame:
-        x = 300
-        for j in i:
-            if j is None: screen.blit(pg.image.load('a\\blank icon.png'), (x, y))
-            elif j == 'wave': screen.blit(pg.image.load('a\\wave icon.png'), (x, y))
-            elif j == 'dragon': screen.blit(pg.image.load('a\\dragon icon.png'), (x, y))
-            elif j == 'berry': screen.blit(pg.image.load('a\\berry icon.png'), (x, y))
-            elif j == 'sun': screen.blit(pg.image.load('a\\sun icon.png'), (x, y))
-            elif j == 'sonar': screen.blit(pg.image.load('a\\sonar icon.png'), (x, y))
-            elif j == 'meat': screen.blit(pg.image.load('a\\meat icon.png'), (x, y))
-            x += 50
-        y += 50
+#    for i in minigame:
+#        x = 300
+#        for j in i:
+#            if j is None: screen.blit(pg.image.load('a\\blank icon.png'), (x, y))
+#            elif j == 'wave': screen.blit(pg.image.load('a\\wave icon.png'), (x, y))
+#            elif j == 'dragon': screen.blit(pg.image.load('a\\dragon icon.png'), (x, y))
+#            elif j == 'berry': screen.blit(pg.image.load('a\\berry icon.png'), (x, y))
+#            elif j == 'sun': screen.blit(pg.image.load('a\\sun icon.png'), (x, y))
+#            elif j == 'sonar': screen.blit(pg.image.load('a\\sonar icon.png'), (x, y))
+#            elif j == 'meat': screen.blit(pg.image.load('a\\meat icon.png'), (x, y))
+#            x += 50
+#        y += 50
     if letter_timer == 0:
-        screen.blit(font.render(f'Letter is available!', True, (0, 0, 0)), (50, 230))
+        screen.blit(font.render(f'Letter is available!', True, (0, 0, 0)), (10, 10))
     else:
-        screen.blit(font.render(f'Letter will be available again in: {round(letter_timer - time.time(), 2)}s', True, (0, 0, 0)), (50, 230))
+        screen.blit(font.render(f'Letter will be available again in: {round(letter_timer - time.time(), 2)}s', True, (0, 0, 0)), (10, 10))
     if match_timer == 0:
-        screen.blit(font.render(f'Rose garden minigame is available!', True, (0, 0, 0)), (50, 260))
+        screen.blit(font.render(f'Rose garden minigame is available!', True, (0, 0, 0)), (10, 40))
     else:
-        screen.blit(font.render(f'Rose garden will be available again in: {round(match_timer - time.time(), 2)}s', True, (0, 0, 0)), (50, 260))
+        screen.blit(font.render(f'Rose garden will be available again in: {round(match_timer - time.time(), 2)}s', True, (0, 0, 0)), (10, 40))
     pgd.flip()
 
 pg.init()
-(width, height) = (600, 400)
+(width, height) = (450, 80)
 screen = pgd.set_mode((width, height))
 font = pg.font.Font('a\Bolgart.ttf', 18); credit_font = pg.font.Font('a\Bolgart.ttf', 11)
 pgd.set_caption('CoSCounter')
