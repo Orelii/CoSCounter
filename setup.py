@@ -1,7 +1,7 @@
 from cx_Freeze import setup, Executable
 
 build_exe_options = {
-    "packages":["pyautogui","cv2","pygame","asyncio"],
+    "packages":["pyautogui","cv2","pygame","asyncio","requests"],
     "include_files":[("a\\")]}
 
 setup(

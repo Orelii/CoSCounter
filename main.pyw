@@ -1,5 +1,5 @@
 import pyautogui as pya
-import time, asyncio
+import time, asyncio, requests
 import pygame as pg
 import pygame.display as pgd
 
@@ -37,8 +37,7 @@ async def rose_garden():
         end_pos = pya.locateOnScreen('a\\match_end_1.png', confidence = 0.5)
         leave_pos = pya.locateOnScreen('a\\match_end_2.png', confidence = 0.5)
         rose_pos = pya.locateOnScreen('a\\thirty.png', confidence = 0.6, region = (0, 0, 250, pya.size()[1]))
-        if end_pos is not None or \
-           leave_pos is not None and \
+        if (end_pos is not None or leave_pos is not None) and \
            match_check == True and \
            (pya.locateOnScreen('a\\thirty.png', confidence = 0.6) is not None or pya.locateOnScreen('a\\one.png', confidence = 0.6) is not None):
             if pya.locateOnScreen('a\\letter_end.png', confidence = 0.7) is None:
@@ -94,6 +93,9 @@ pg.init()
 font = pg.font.Font('a\Bolgart.ttf', 18); credit_font = pg.font.Font('a\Bolgart.ttf', 11)
 pgd.set_caption('CoSCounter')
 running = True
+
+check_for_updates = requests.get("https://api.github.com/repos/Orelii/CoSCounter/releases/latest")
+if check_for_updates.json()["name"] != f'v{version}': pgd.set_caption('CoSCounter (Update available!')
 
 while running:
     for event in pg.event.get():
